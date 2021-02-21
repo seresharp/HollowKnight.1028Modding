@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Modding</RootNamespace>
+    <AssemblyName>Assembly-CSharp.Modding.mm</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net35</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <AssemblyTitle>HK 1028 Modding API</AssemblyTitle>
+    <Product>HK 1028 Modding API</Product>
+    <Copyright>MIT</Copyright>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <OutputLoc>$(SolutionDir)Output\</OutputLoc>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Output\**" />
+    <Compile Remove="Vanilla\**" />
+    <EmbeddedResource Remove="Output\**" />
+    <EmbeddedResource Remove="Vanilla\**" />
+    <None Remove="Output\**" />
+    <None Remove="Vanilla\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="ILRepack" Version="2.0.18" GeneratePathProperty="true" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.4">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MonoMod" Version="21.1.11.1">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MonoMod.RuntimeDetour" Version="21.1.11.1">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="21.1.11.1">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MonoMod.Utils" Version="21.1.11.1">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ValueTupleBridge" Version="0.1.5">
+      <IncludeAssets>all</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>Vanilla\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="PlayMaker">
+      <HintPath>Vanilla\PlayMaker.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>Vanilla\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>Vanilla\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Vanilla\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <MakeDir Condition="Exists('$(OutputLoc)')" Directories="$(OutputLoc)" />
+    <Delete Condition="Exists('$(OutputLoc)Assembly-CSharp.dll')" Files="$(OutputLoc)Assembly-CSharp.dll" />
+    
+    <Delete Condition="Exists('$(TargetDir)MONOMODDED_Assembly-CSharp.dll')" Files="$(TargetDir)MONOMODDED_Assembly-CSharp.dll" />
+    <Exec WorkingDirectory="$(TargetDir)" Command="MonoMod.exe Assembly-CSharp.dll" />
+    <Exec Condition="!Exists('$(TargetDir)MMHOOK_Assembly-CSharp.dll')" WorkingDirectory="$(TargetDir)" Command="MonoMod.RuntimeDetour.HookGen.exe --private Assembly-CSharp.dll" />
+
+    <Move SourceFiles="$(TargetDir)Assembly-CSharp.dll" DestinationFiles="$(TargetDir)OriginalAssembly-CSharp.dll" />
+    
+    <Copy SourceFiles="$(PkgILRepack)\tools\ILRepack.exe" DestinationFiles="$(TargetDir)ILRepack.exe" SkipUnchangedFiles="true" />
+    <Exec WorkingDirectory="$(TargetDir)" Command="ILRepack.exe /out:Assembly-CSharp.dll MONOMODDED_Assembly-CSharp.dll MMHOOK_Assembly-CSharp.dll Mono.Cecil.dll MonoMod.RuntimeDetour.dll MonoMod.Utils.dll ValueTupleBridge.dll" />
+    <Copy SourceFiles="$(TargetDir)Assembly-CSharp.dll" DestinationFiles="$(OutputLoc)Assembly-CSharp.dll" />
+
+    <Move SourceFiles="$(TargetDir)OriginalAssembly-CSharp.dll" DestinationFiles="$(TargetDir)Assembly-CSharp.dll" />
+  </Target>
+</Project>
