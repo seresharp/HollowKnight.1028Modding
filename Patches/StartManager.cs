@@ -20,6 +20,9 @@ namespace Modding.Patches
         {
             LoadMods();
             StartCoroutine(Preload());
+
+            ModVersionText.PopulateVersionList();
+            DontDestroyOnLoad(new GameObject("Mod Version Text").AddComponent<ModVersionText>());
         }
 
         private void LoadMods()

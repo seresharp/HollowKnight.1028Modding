@@ -9,6 +9,8 @@ namespace Modding
     {
         internal static readonly List<Mod> ModList = new List<Mod>();
 
+        public virtual string Version => "UNKNOWN";
+
         protected Mod(string name) : base(name)
         {
             Log("Initializing");
