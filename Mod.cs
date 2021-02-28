@@ -113,7 +113,7 @@ namespace Modding
                     continue;
                 }
 
-                yield return new WaitForSecondsRealtime(wait);
+                yield return new WaitForSeconds(wait);
             }
         }
     }

@@ -6,7 +6,7 @@ namespace Modding
 {
     internal class ModVersionText : MonoBehaviour
     {
-        private const string API_VERSION = "1028 Modding API: 0.0.2\n";
+        private const string API_VERSION = "1028 Modding API: 0.0.3\n";
 
         private static string _versionText = API_VERSION;
 
